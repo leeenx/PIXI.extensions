@@ -1,5 +1,5 @@
 // PIXI 的扩展
-PIXI.Sprite.prototype.set = function(arg) {
+PIXI.DisplayObject.prototype.set = function(arg) {
 	for(let key in arg) {
 		this[key] = arg[key]; 
 	}
