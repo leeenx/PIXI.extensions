@@ -22,5 +22,37 @@ Object.defineProperties(PIXI.DisplayObject.prototype, {
 		get: function() {
 			return this.scale.y; 
 		}
+	}, 
+	pivotX: {
+		set: function(value) {
+			this.pivot.x = value; 
+		}, 
+		get: function() {
+			return this.pivot.x; 
+		}
+	}, 
+	pivotY: {
+		set: function(value) {
+			this.pivot.y = value
+		}, 
+		get: function() {
+			return this.pivot.y; 
+		}
+	}, 
+	anchorX: {
+		set: function(value) {
+			this.anchor.x = value; 
+		}, 
+		get: function() {
+			return this.anchor.x; 
+		}
+	}, 
+	anchorY: {
+		set: function(value) {
+			this.anchor.y = value
+		}, 
+		get: function() {
+			return this.anchor.y; 
+		}
 	}
 }); 
