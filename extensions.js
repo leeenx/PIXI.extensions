@@ -1,61 +1,158 @@
-// PIXI 的扩展
-PIXI.DisplayObject.prototype.set = function(arg) {
-	for(let key in arg) {
-		this[key] = arg[key]; 
+// 扩展
+{
+	PIXI.DisplayObject.prototype.set = function(arg) {
+		for(let key in arg) {
+			this[key] = arg[key]; 
+		}
 	}
+
+	// scale 属性拍平
+	Object.defineProperties(PIXI.DisplayObject.prototype, {
+		scaleX: {
+			set: function(value) {
+				this.scale.x = value; 
+			}, 
+			get: function() {
+				return this.scale.x; 
+			}
+		}, 
+		scaleY: {
+			set: function(value) {
+				this.scale.y = value; 
+			}, 
+			get: function() {
+				return this.scale.y; 
+			}
+		}, 
+		pivotX: {
+			set: function(value) {
+				this.pivot.x = value; 
+			}, 
+			get: function() {
+				return this.pivot.x; 
+			}
+		}, 
+		pivotY: {
+			set: function(value) {
+				this.pivot.y = value
+			}, 
+			get: function() {
+				return this.pivot.y; 
+			}
+		}, 
+		anchorX: {
+			set: function(value) {
+				this.anchor.x = value; 
+			}, 
+			get: function() {
+				return this.anchor.x; 
+			}
+		}, 
+		anchorY: {
+			set: function(value) {
+				this.anchor.y = value
+			}, 
+			get: function() {
+				return this.anchor.y; 
+			}
+		}
+	}); 
 }
 
-// scale 属性拍平
-Object.defineProperties(PIXI.DisplayObject.prototype, {
-	scaleX: {
-		set: function(value) {
-			this.scale.x = value; 
+// PStyle
+{
+	var proto = PIXI.DisplayObject.prototype; 
+
+	// 注册点
+	Object.defineProperty(proto, "origin", {
+		get: function() { 
+			return [this.pivot.x, this.pivot.y]; 
 		}, 
-		get: function() {
-			return this.scale.x; 
+		set: function(coord) { 
+			this.pivot.set(coord[0], coord[1]); 
+			this.updatePosition(); 
 		}
-	}, 
-	scaleY: {
-		set: function(value) {
-			this.scale.y = value; 
+	})
+
+	Object.defineProperty(proto, "left", { 
+		get: function() {
+			return this._left === undefined ? this.x - this.pivot.x : this._left; 
 		}, 
-		get: function() {
-			return this.scale.y; 
-		}
-	}, 
-	pivotX: {
 		set: function(value) {
-			this.pivot.x = value; 
-		}, 
-		get: function() {
-			return this.pivot.x; 
+			this._left = value; 
+			this.x = value + this.pivot.x; 
 		}
-	}, 
-	pivotY: {
+	}); 
+
+	Object.defineProperty(proto, "right", {
+		get: function() {
+			return this._right === undefined ? this._right : this.x - this.pivot.x; 
+		}, 
+		set: function(value) { 
+			if(value === undefined) return ; 
+			this._right = value; 
+			if(this.parent !== null) {
+				this.x = this.parent.width - value; 
+			}
+			else {
+				this.x = -value; 
+			} 
+		}
+	}); 
+
+	Object.defineProperty(proto, "top", { 
+		get: function() {
+			return this._top === undefined ? this.y - this.pivot.y : this._top; 
+		}, 
 		set: function(value) {
-			this.pivot.y = value
-		}, 
-		get: function() {
-			return this.pivot.y; 
+			this._top = value; 
+			this.y = value + this.pivot.y; 
 		}
-	}, 
-	anchorX: {
-		set: function(value) {
-			this.anchor.x = value; 
-		}, 
+	}); 
+
+	Object.defineProperty(proto, "bottom", {
 		get: function() {
-			return this.anchor.x; 
-		}
-	}, 
-	anchorY: {
-		set: function(value) {
-			this.anchor.y = value
+			return this._bottom === undefined ? this._bottom : this.y - this.pivot.y; 
 		}, 
-		get: function() {
-			return this.anchor.y; 
+		set: function(value) { 
+			if(value === undefined) return ; 
+			this._bottom = value; 
+			if(this.parent !== null) {
+				this.y = this.parent.height - value; 
+			}
+			else {
+				this.y = -value; 
+			} 
 		}
+	}); 
+
+	// top & left 初始值是 0
+	proto._top = proto._left = 0; 
+
+	// 更新 position
+	proto.updatePosition = function() { 
+		this.top = this._top; 
+		this.right = this._right; 
+		this.bottom = this._bottom; 
+		this.left = this._left; 
 	}
-}); 
+
+	// 监听 addChild
+	var _addChild = PIXI.Container.prototype.addChild; 
+	PIXI.Container.prototype.addChild = function(child) {
+		_addChild.call(this, child); 
+		// 更新 right & bottom
+		this.right = this._right; 
+		this.bottom = this._bottom; 
+	}
+	var _addChildAt = PIXI.Container.prototype.addChildAt; 
+	PIXI.Container.prototype.addChildAt = function(child, index) {
+		_addChildAt.call(this, child, index); 
+		// 更新 right & bottom
+		this.right = this._right; 
+		this.bottom = this._bottom; 
+	}
+}
 
 // 获取不带描边的boudary
 {
