@@ -136,11 +136,16 @@
 
 	// 监听 addChild
 	var _addChild = PIXI.Container.prototype.addChild; 
-	PIXI.Container.prototype.addChild = function(child) {
-		_addChild.call(this, child); 
+	PIXI.Container.prototype.addChild = function() { 
+		var len = arguments.length; 
+		if(len === 0) return ;
+		_addChild.apply(this, arguments); 
 		// 更新 right & bottom
-		child.right = child._right; 
-		child.bottom = child._bottom; 
+		for(var i = 0; i < len; ++i) { 
+			var child = arguments[i]; 
+			child.right = child._right; 
+			child.bottom = child._bottom; 
+		}
 	}
 	var _addChildAt = PIXI.Container.prototype.addChildAt; 
 	PIXI.Container.prototype.addChildAt = function(child, index) {
