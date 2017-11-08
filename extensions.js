@@ -1,6 +1,8 @@
 // 扩展
 {
-	PIXI.DisplayObject.prototype.set = function(arg) {
+	// DisplayObject 的原型
+	var proto = PIXI.DisplayObject.prototype; 
+	proto.set = function(arg) {
 		for(let key in arg) {
 			this[key] = arg[key]; 
 		}
@@ -57,11 +59,6 @@
 			}
 		}
 	}); 
-}
-
-// PStyle
-{
-	var proto = PIXI.DisplayObject.prototype; 
 
 	// 注册点
 	Object.defineProperty(proto, "origin", {
@@ -91,11 +88,11 @@
 		set: function(value) { 
 			if(value === undefined) return ; 
 			this._right = value; 
-			if(this.parent !== null) {
-				this.x = this.parent.width - value; 
+			if(this.parent !== null) { 
+				this.x = this.parent.width - this.width - value; 
 			}
 			else {
-				this.x = -value; 
+				this.x = 0; 
 			} 
 		}
 	}); 
@@ -118,10 +115,10 @@
 			if(value === undefined) return ; 
 			this._bottom = value; 
 			if(this.parent !== null) {
-				this.y = this.parent.height - value; 
+				this.y = this.parent.height - this.height - value; 
 			}
 			else {
-				this.y = -value; 
+				this.y = 0; 
 			} 
 		}
 	}); 
@@ -142,15 +139,15 @@
 	PIXI.Container.prototype.addChild = function(child) {
 		_addChild.call(this, child); 
 		// 更新 right & bottom
-		this.right = this._right; 
-		this.bottom = this._bottom; 
+		child.right = child._right; 
+		child.bottom = child._bottom; 
 	}
 	var _addChildAt = PIXI.Container.prototype.addChildAt; 
 	PIXI.Container.prototype.addChildAt = function(child, index) {
 		_addChildAt.call(this, child, index); 
 		// 更新 right & bottom
-		this.right = this._right; 
-		this.bottom = this._bottom; 
+		child.right = child._right; 
+		child.bottom = child._bottom; 
 	}
 }
 
