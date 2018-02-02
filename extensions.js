@@ -203,3 +203,31 @@ PIXI.Container.prototype.addChildAt = function(child, index) {
         }
     }); 
 }
+
+// 动态生成缓存
+PIXI.DisplayObject.prototype.generateCanvasTexture = function({x, y, width, height} = {x: 0, y: 0, width: 0, height: 0}) { 
+	width = width || this.width; 
+	height = height || this.height; 
+	// 缓存 
+	let cache = new PIXI.Texture(PIXI.Texture.EMPTY, new PIXI.Rectangle(0, 0, width, height)); 
+	let baseTexture = this.texture.baseTexture; 
+	let img = baseTexture.source; 
+	// 创建缓存 
+	let generate = () => { 
+		let canvas = document.createElement("canvas"); 
+		let ctx = canvas.getContext("2d"); 
+		canvas.width = width; 
+		canvas.height = height; 
+		ctx.drawImage(img, x, y, width, height, 0, 0, width, height); 
+		cache.baseTexture = new PIXI.BaseTexture(canvas); 
+	}
+	// 图片未加载成功
+	if(baseTexture.hasLoaded !== true) { 
+		baseTexture.on("loaded", () => generate()); 
+	}
+	// 图片加载成功
+	else {
+		generate(); 
+	} 
+	return cache; 
+}
