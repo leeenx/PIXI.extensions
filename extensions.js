@@ -220,6 +220,8 @@ PIXI.DisplayObject.prototype.generateCanvasTexture = function({x, y, width, heig
 		canvas.height = height; 
 		ctx.drawImage(img, x, y, width, height, 0, 0, width, height); 
 		cache.baseTexture = new PIXI.BaseTexture(canvas); 
+		// 通知更新
+		cache.onBaseTextureLoaded(cache.baseTexture); 
 	}
 	// 图片未加载成功
 	if(baseTexture.hasLoaded !== true) { 
