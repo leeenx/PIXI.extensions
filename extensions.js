@@ -204,8 +204,8 @@ PIXI.Container.prototype.addChildAt = function(child, index) {
     }); 
 }
 
-// 动态生成缓存
-PIXI.DisplayObject.prototype.generateCanvasTexture = function({x, y, width, height} = {x: 0, y: 0, width: 0, height: 0}) { 
+// 动态生成sprite缓存
+PIXI.Sprite.prototype.generateCanvasTexture = function({x, y, width, height} = {x: 0, y: 0, width: 0, height: 0}) { 
 	width = width || this.width; 
 	height = height || this.height; 
 	// 缓存 
