@@ -127,6 +127,15 @@ Object.defineProperties(proto, {
 			this.y += (this.velocityY + velocityY) * elapsed / 2; 
 		}, 
 		get: function() {return this._t}
+	}, 
+	index: {
+		set: function(value) {
+			if(this._index !== value) {
+				this._index = value; 
+				this.parent.setChildIndex(this, value); 
+			}
+		}, 
+		get: () => this._index
 	}
 }); 
 
