@@ -1,4 +1,6 @@
-// 扩展
+/*
+	@ PIXI 扩展
+*/
 // DisplayObject 的原型
 var proto = PIXI.DisplayObject.prototype; 
 proto.set = function(arg) {
@@ -6,6 +8,8 @@ proto.set = function(arg) {
 		this[key] = arg[key]; 
 	}
 }
+
+proto.offsetX = proto.offsetY = 0; 
 
 Object.defineProperties(proto, {
 	scaleX: {
@@ -61,22 +65,32 @@ Object.defineProperties(proto, {
 			return [this.pivot.x, this.pivot.y]; 
 		}, 
 		set: function(coord) { 
+			// rotation/skew/scale 会影响 pivot 定位
+			let parent = this.parent || this._tempDisplayObjectParent; 
+			let pointA = parent.toLocal(new PIXI.Point(this.pivot.x, this.pivot.y), this)
+			let pointB = parent.toLocal(new PIXI.Point(coord[0], coord[1]), this); 
+			// 位置调整
+			this.x = this.x + pointB.x - pointA.x; 
+			this.y = this.y + pointB.y - pointA.y; 
+			// 偏移量重置
+			this.offsetX += pointB.x - pointA.x; 
+			this.offsetY += pointB.y - pointA.y; 
+
 			this.pivot.set(coord[0], coord[1]); 
-			this.updatePosition(); 
 		}
 	}, 
 	left: { 
 		get: function() {
-			return this._left === undefined ? this.x - this.pivot.x : this._left; 
+			return this._left === undefined ? this.x - this.offsetX : this._left; 
 		}, 
 		set: function(value) {
 			this._left = value; 
-			this.x = value + this.pivot.x; 
+			this.x = value + this.offsetX; 
 		}
 	}, 
 	right: {
 		get: function() {
-			return this._right === undefined ? this._right : this.x - this.pivot.x; 
+			return this._right === undefined ? this.x - this.offsetX - this.width : this._right; 
 		}, 
 		set: function(value) { 
 			if(value === undefined) return ; 
@@ -91,16 +105,16 @@ Object.defineProperties(proto, {
 	}, 
 	top: { 
 		get: function() {
-			return this._top === undefined ? this.y - this.pivot.y : this._top; 
+			return this._top === undefined ? this.y - this.offsetY : this._top; 
 		}, 
 		set: function(value) {
 			this._top = value; 
-			this.y = value + this.pivot.y; 
+			this.y = value + this.offsetY; 
 		}
 	}, 
 	bottom: {
 		get: function() {
-			return this._bottom === undefined ? this._bottom : this.y - this.pivot.y; 
+			return this._bottom === undefined ? this.y - this.offsetY - this.height : this._bottom; 
 		}, 
 		set: function(value) { 
 			if(value === undefined) return ; 
@@ -151,14 +165,6 @@ Object.assign(
 		_left: 0
 	}
 ); 
-
-// 更新 position
-proto.updatePosition = function() { 
-	this.top = this._top; 
-	this.right = this._right; 
-	this.bottom = this._bottom; 
-	this.left = this._left; 
-}
 
 // 监听 addChild
 var _addChild = PIXI.Container.prototype.addChild; 
