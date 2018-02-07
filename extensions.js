@@ -107,15 +107,15 @@ Object.defineProperties(proto, {
 			let pointB = parent.toLocal(new PIXI.Point(coord[0], coord[1]), this); 
 			
 			// 盒子偏移
-			let boxOffsetX = pointB.x - (pointA.x + coord[0]); 
-			let boxOffsetY = pointB.y - (pointA.y + coord[1]);
+			this.boxOffsetX = pointB.x - (pointA.x + coord[0]); 
+			this.boxOffsetY = pointB.y - (pointA.y + coord[1]);
 
 			// 几何中心的偏移量
-			this.offsetX = pointB.x - pointA.x - boxOffsetX; 
-			this.offsetY = pointB.y - pointA.y - boxOffsetY; 
+			this.offsetX = pointB.x - pointA.x - this.boxOffsetX; 
+			this.offsetY = pointB.y - pointA.y - this.boxOffsetY; 
 
-			this.x = this._left + this.offsetX + boxOffsetX; 
-			this.y = this._top + this.offsetY + boxOffsetY; 
+			this.x = this._left + this.offsetX; 
+			this.y = this._top + this.offsetY; 
 
 			this.pivot.set(coord[0], coord[1]); 
 		}
