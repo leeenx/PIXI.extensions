@@ -13,19 +13,53 @@ proto.offsetX = proto.offsetY = 0;
 
 Object.defineProperties(proto, {
 	scaleX: {
-		set: function(value) {
-			this.scale.x = value; 
+		set: function(value) { 
+			if(this.scale.x !== value) { 
+				this.scale.x = value; 
+			}
 		}, 
 		get: function() {
 			return this.scale.x; 
 		}
 	}, 
 	scaleY: {
-		set: function(value) {
-			this.scale.y = value; 
+		set: function(value) { 
+			if(this.scale.y !== value) { 
+				this.scale.y = value; 
+			}
 		}, 
 		get: function() {
 			return this.scale.y; 
+		}
+	}, 
+	skewX: {
+		set: function(value) {
+			if(this.skew.x !== value) { 
+				this.skew.x = value; 
+			}
+		}, 
+		get: function() {
+			return this.skew.x; 
+		}
+	}, 
+	skewY: {
+		set: function(value) {
+			if(this.skew.y !== value) { 
+				this.skew.y = value; 
+			}
+		}, 
+		get: function() {
+			return this.skew.y; 
+		}
+	}, 
+	rotate: {
+		set: function(value) {
+			if(this.rotation !== value) { 
+				this.rotation = value; 
+			}
+		}, 
+		get: function() {
+			return this.rotation; 
 		}
 	}, 
 	pivotX: {
@@ -38,7 +72,7 @@ Object.defineProperties(proto, {
 	}, 
 	pivotY: {
 		set: function(value) {
-			this.pivot.y = value
+			this.pivot.y = value; 
 		}, 
 		get: function() {
 			return this.pivot.y; 
@@ -67,21 +101,28 @@ Object.defineProperties(proto, {
 		set: function(coord) { 
 			// rotation/skew/scale 会影响 pivot 定位
 			let parent = this.parent || this._tempDisplayObjectParent; 
-			let pointA = parent.toLocal(new PIXI.Point(this.pivot.x, this.pivot.y), this)
+			// 未形变的左上角坐标
+			let pointA = {x: this._left, y: this._top}; 
+			// 形变后的中心坐标
 			let pointB = parent.toLocal(new PIXI.Point(coord[0], coord[1]), this); 
-			// 位置调整
-			this.x = this.x + pointB.x - pointA.x; 
-			this.y = this.y + pointB.y - pointA.y; 
-			// 偏移量重置
-			this.offsetX += pointB.x - pointA.x; 
-			this.offsetY += pointB.y - pointA.y; 
+			
+			// 盒子偏移
+			let boxOffsetX = pointB.x - (pointA.x + coord[0]); 
+			let boxOffsetY = pointB.y - (pointA.y + coord[1]);
+
+			// 几何中心的偏移量
+			this.offsetX = pointB.x - pointA.x - boxOffsetX; 
+			this.offsetY = pointB.y - pointA.y - boxOffsetY; 
+
+			this.x = this._left + this.offsetX + boxOffsetX; 
+			this.y = this._top + this.offsetY + boxOffsetY; 
 
 			this.pivot.set(coord[0], coord[1]); 
 		}
 	}, 
 	left: { 
 		get: function() {
-			return this._left === undefined ? this.x - this.offsetX : this._left; 
+			return this._left; 
 		}, 
 		set: function(value) {
 			this._left = value; 
@@ -90,41 +131,33 @@ Object.defineProperties(proto, {
 	}, 
 	right: {
 		get: function() {
-			return this._right === undefined ? this.x - this.offsetX - this.width : this._right; 
+			return this._right; 
 		}, 
 		set: function(value) { 
 			if(value === undefined) return ; 
 			this._right = value; 
-			if(this.parent !== null) { 
-				this.x = this.parent.width - this.width - value; 
-			}
-			else {
-				this.x = 0; 
-			} 
+			// 由 left 实现 
+			this.left = this.parent.width - this.width - value; 
 		}
 	}, 
 	top: { 
 		get: function() {
-			return this._top === undefined ? this.y - this.offsetY : this._top; 
+			return this._top; 
 		}, 
-		set: function(value) {
+		set: function(value) { 
 			this._top = value; 
 			this.y = value + this.offsetY; 
 		}
 	}, 
 	bottom: {
 		get: function() {
-			return this._bottom === undefined ? this.y - this.offsetY - this.height : this._bottom; 
+			return this._bottom; 
 		}, 
 		set: function(value) { 
 			if(value === undefined) return ; 
 			this._bottom = value; 
-			if(this.parent !== null) {
-				this.y = this.parent.height - this.height - value; 
-			}
-			else {
-				this.y = 0; 
-			} 
+			// 由 top 实现
+			this.top = this.parent.height - this.height - value; 
 		}
 	}, 
 	// 运动时间
